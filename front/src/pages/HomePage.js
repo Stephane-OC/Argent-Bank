@@ -1,25 +1,14 @@
-import React from 'react';
 import '../css/main.css';
 
+import chatIco from '../img/icon-chat.png'
+import moneyIco from '../img/icon-money.png'
+import securityIco from '../img/icon-security.png'
+
+import HeaderHome from '../components/HeaderHome/HeaderHome';
 function HomePage() {
   return (
     <div>
-      <nav className="main-nav">
-        <a className="main-nav-logo" href="./index.html">
-          <img
-            className="main-nav-logo-image"
-            src="../img/argentBankLogo.png"
-            alt="Argent Bank Logo"
-          />
-          <h1 className="sr-only">Argent Bank</h1>
-        </a>
-        <div>
-          <a className="main-nav-item" href="./sign-in.html">
-            <i className="fa fa-user-circle"></i>
-            Sign In
-          </a>
-        </div>
-      </nav>
+      <HeaderHome />
       <main>
         <div className="hero">
           <section className="hero-content">
@@ -33,7 +22,7 @@ function HomePage() {
         <section className="features">
           <h2 className="sr-only">Features</h2>
           <div className="feature-item">
-            <img src="../img/icon-chat.png" alt="Chat Icon" className="feature-icon" />
+            <img src={chatIco} alt="Chat Icon" className="feature-icon" />
             <h3 className="feature-item-title">You are our #1 priority</h3>
             <p>
               Need to talk to a representative? You can get in touch through our
@@ -42,7 +31,7 @@ function HomePage() {
           </div>
           <div className="feature-item">
             <img
-              src="../img/icon-money.png"
+              src={moneyIco}
               alt="Money Icon"
               className="feature-icon"
             />
@@ -53,7 +42,7 @@ function HomePage() {
           </div>
           <div className="feature-item">
             <img
-              src="../img/icon-security.png"
+              src={securityIco}
               alt="Security Icon"
               className="feature-icon"
             />
@@ -65,9 +54,6 @@ function HomePage() {
           </div>
         </section>
       </main>
-      <footer className="footer">
-        <p className="footer-text">Copyright 2020 Argent Bank</p>
-      </footer>
     </div>
   );
 }

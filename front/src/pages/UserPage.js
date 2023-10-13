@@ -1,14 +1,37 @@
-import React from 'react';
-import '../css/main.css';
+import React from "react";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { clearRememberedUser } from "../utils/store";
+
+import "../css/main.css";
+import argentBankLogo from "../img/argentBankLogo.png";
 
 function UserPage() {
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // Clear the JWT token and other user credentials from localStorage
+    localStorage.removeItem("jwt");
+    localStorage.removeItem("email");
+    localStorage.removeItem("password");
+    localStorage.removeItem("isRemember");
+
+    // Clear the token from the Redux store
+    dispatch(clearRememberedUser());
+
+    // Redirect the user to the home page
+    navigate("/");
+  };
+
   return (
     <div>
       <nav className="main-nav">
         <a className="main-nav-logo" href="./index.html">
           <img
             className="main-nav-logo-image"
-            src="../img/argentBankLogo.png"
+            src={argentBankLogo}
             alt="Argent Bank Logo"
           />
           <h1 className="sr-only">Argent Bank</h1>
@@ -18,7 +41,11 @@ function UserPage() {
             <i className="fa fa-user-circle"></i>
             Tony
           </a>
-          <a className="main-nav-item" href="./index.html">
+          <a
+            className="main-nav-item"
+            href="./"
+            onClick={handleLogout}
+          >
             <i className="fa fa-sign-out"></i>
             Sign Out
           </a>
@@ -26,7 +53,11 @@ function UserPage() {
       </nav>
       <main className="main bg-dark">
         <div className="header">
-          <h1>Welcome back<br />Tony Jarvis!</h1>
+          <h1>
+            Welcome back
+            <br />
+            Tony Jarvis!
+          </h1>
           <button className="edit-button">Edit Name</button>
         </div>
         <h2 className="sr-only">Accounts</h2>
@@ -61,9 +92,6 @@ function UserPage() {
           </div>
         </section>
       </main>
-      <footer className="footer">
-        <p className="footer-text">Copyright 2020 Argent Bank</p>
-      </footer>
     </div>
   );
 }
