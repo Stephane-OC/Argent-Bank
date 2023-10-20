@@ -29,7 +29,7 @@ function SignInPage() {
     email: localStorage.getItem("email") || "",
     password: localStorage.getItem("password") || "",
   });
-  const [isRemembered, setIsRemembered] = useState(false);
+  const [isRemembered, setIsRemembered] = useState(localStorage.getItem("isRemember") === "true"); 
   // To store error messages
   const [errorMessage, setErrorMessage] = useState(""); 
 
@@ -44,21 +44,25 @@ function SignInPage() {
           localStorage.setItem("jwt", responseData.body.token);
           localStorage.setItem("email", userCredentials.email);
           localStorage.setItem("password", userCredentials.password);
-          dispatch(storeAuthToken({ token: responseData.body.token }));
+          localStorage.setItem("isRemember", "true"); 
         } else {
+          localStorage.removeItem("isRemember"); 
           dispatch(clearRememberedUser());
         }
+
+        dispatch(storeAuthToken({ token: responseData.body.token })); 
+
         // Displays a confirmation message with the user's first name
         console.log(`L'utilisateur est bien connecté !`);
         // Redirect to the user's page
         navigate('/user');
       } else {
-        // Handle authentication error
+        // Handle authentification error
         setErrorMessage("Erreur d'authentification. Veuillez réessayer.");
       }
     } catch (error) {
       console.error(error);
-      // Handle authentication error
+      // Handle authentification error
       setErrorMessage("Une erreur est survenue lors de la connexion. Veuillez réessayer.");
     }
   };
@@ -66,11 +70,12 @@ function SignInPage() {
   useEffect(() => {
     const storedToken = localStorage.getItem("jwt");
     const storedRememberFlag = localStorage.getItem("isRemember");
-    if (storedRememberFlag && storedToken) {
-      // Redirect to the user's page
+
+    if (storedToken && storedRememberFlag === "true") { 
+      dispatch(storeAuthToken({ token: storedToken })); 
       navigate('/user');
     }
-  }, [navigate]);
+  }, [dispatch, navigate]);
 
   return (
     <div>
