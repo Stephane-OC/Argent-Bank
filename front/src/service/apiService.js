@@ -72,4 +72,40 @@ export const getUserProfile = async (token) => {
   }
 };
 
+/* updateUserProfile function is tasked with sending updated user data to backend API.  **
+**                                                                                      **
+** It accepts a JWT token and a userData object as parameters. JWT token is used to     **
+** authenticate request, while userData object contains new values for user's           **
+** profile that need to be updated.                                                     **
+**                                                                                      **
+** This function constructs a PUT request to '/user/profile' endpoint of API, including **  
+** JWT token in authorization headers, and userData object as body of request.          **
+** If request is successful, function returns updated profile data as provided by       **
+** API response.                                                                        **
+**                                                                                      **
+** In event of a request failure, such as a network issue or an authentication problem, **
+** function throws an error. This error should be caught and handled appropriately      **
+** by caller to ensure a good user experience.                                          */
 
+export const updateUserProfile = async (token, userData) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/user/profile`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(userData)
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to update user profile');
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};

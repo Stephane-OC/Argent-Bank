@@ -15,6 +15,24 @@ import argentBankLogo from "../img/argentBankLogo.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUserCircle, faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
 
+
+/* UserPage is main React component for user's profile page within application.                                   **
+**                                                                                                                **
+** This page is responsible for displaying user's profile information, bank account details,                      **
+** and providing ability to edit user's name and log out. It interacts with Redux store                           **
+** to manage global state and with React Router for navigation.                                                   **
+**                                                                                                                **
+** Key functionalities include:                                                                                   **
+** - Retrieving and displaying user's profile data from Redux store.                                              **
+** - Enabling user to initiate an edit of their name, which toggles display of UserEdit component.                **
+** - Handling user logout, which clears JWT token and other authentication-related information from               **
+**   localStorage and Redux store before redirecting user to home page.                                           **
+** - On initial load, checking for a valid authentication token and redirecting to sign-in page if none is found. **
+** - Displaying a list of user's bank accounts with functionality to view transactions for each account.          **
+**                                                                                                                **
+** Page is structured with a navigation bar at top, a main content area with user's greeting and account          **
+** information, and a conditional rendering of UserEdit component based on editing state.                         */
+
 function UserPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -55,7 +73,7 @@ function UserPage() {
           dispatch(setAuthError(err.toString()));
         });
     }
-}, [authState, navigate, dispatch]);
+  }, [authState, navigate, dispatch]);
 
   const handleLogout = () => {
     localStorage.removeItem("jwt");
@@ -102,8 +120,17 @@ function UserPage() {
               "User"
             )}
           </h1>
-          <button className="edit-button" onClick={handleEditClick}>Edit Name</button>
-            {isEditing ? <UserEdit onCloseEdit={handleCloseEdit} /> : null}
+
+          <div className="edit-button-container">
+            {isEditing ? (
+              <UserEdit onCloseEdit={handleCloseEdit} />
+            ) : (
+              <button className="edit-button" onClick={handleEditClick}>
+                Edit Name
+              </button>
+            )}
+          </div>
+          
         </div>
         <h2 className="sr-only">Accounts</h2>
         <section className="account">
