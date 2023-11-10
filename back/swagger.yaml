@@ -1,166 +1,325 @@
-swagger: '2.0'
+openapi: 3.0.0
 info:
-  title: Bank Argent API documentation
-  description: Contains all available API endpoints in this codebase
-  version: '1.0.0'
-  termsOfService: 'http://swagger.io/terms/'
-host: localhost:3001
-basePath: /api/v1
-schemes:
-  - http
+  title: Argent Bank API
+  description: >
+    API pour la gestion des utilisateurs de la banque Argent. Vous pouvez trouver plus d'informations sur [ArgentBank](https://www.argentbank.com).
+    
+    Pour contribuer au projet ou consulter le code source, visitez le [répertoire GitHub](https://github.com/Stephane-OC/Argent-Bank/tree/main).
+    
+    La documentation détaillée de l'API est disponible [ici](https://github.com/Stephane-OC/Argent-Bank/blob/main/back/swagger.yaml).
+  version: "1.0"
+  termsOfService: "URL vers vos conditions d''utilisation"
+  contact:
+    name: Service Clients ArgentBank
+    url: https://www.argentbank.com/contact
+    email: support@argentbank.com
+  license:
+    name: 'Apache 2.0'
+    url: 'https://www.apache.org/licenses/LICENSE-2.0.html'
+externalDocs:
+  description: Lien vers la documentation externe
+  url: URL vers la documentation externe
+servers:
+  - url: 'https://api.argentbank.com'
+    description: Serveur principal de production
+
 paths:
-  /user/login:
+  /users/signin:
     post:
+      summary: Authentification d'un utilisateur
       tags:
-        - User Module
-      summary: Login
-      description: API for Login
-      parameters:
-        - in: body
-          name: body
-          description: Login Payload
-          required: true
-          schema:
-            $ref: '#/definitions/Login'
-      produces:
-        - application/json
+        - Utilisateurs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+              required:
+                - email
+                - password
       responses:
         '200':
-          description: Login Successfully
-          schema:
-            $ref: '#/definitions/LoginResponse'
-        '400':
-          description: Invalid Fields
-        '500':
-          description: Internal Server Error
-  /user/signup:
-    post:
+          description: Connexion réussie, retourne le Token d'authentification et les informations de l'utilisateur.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Authentification échouée, les identifiants sont incorrects.
+
+  /users/{userId}:
+    get:
+      summary: Obtenir le profil de l'utilisateur
       tags:
-        - User Module
-      summary: Signup
-      description: API for Signup
+        - Utilisateurs
       parameters:
-        - in: body
-          name: body
-          description: Signup Payload
+        - in: path
+          name: userId
           required: true
           schema:
-            $ref: '#/definitions/User'
-      produces:
-        - application/json
+            type: string
       responses:
         '200':
-          description: Signup Successfully
-          schema:
-            $ref: '#/definitions/ApiResponse'
-        '400':
-          description: Invalid Fields
-        '500':
-          description: Internal Server Error
-  /user/profile:
-    post:
-      security:
-        - Bearer: []
-      tags:
-        - User Module
-      summary: User Profile API
-      description: API for fetching a user profile
-      parameters:
-        - in: header
-          name: Authorization
-          description: Attach Bearer JWT token
-          required: true
-      produces:
-        - application/json
-      responses:
-        '200':
-          description: User profile retrieved successully
-          schema:
-            $ref: '#/definitions/ApiResponse'
-        '400':
-          description: Invalid Fields
-        '500':
-          description: Internal Server Error
+          description: Profil de l'utilisateur récupéré avec succès
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: Utilisateur non trouvé
+
     put:
-      security:
-        - Bearer: []
+      summary: Mettre à jour le profil de l'utilisateur
       tags:
-        - User Module
-      summary: User Profile API
-      description: API for updating a user profile
+        - Utilisateurs
       parameters:
-        - in: header
-          name: Authorization
-          description: Attach Bearer JWT token
-          required: true
-        - in: body
-          name: body
-          description: Update user profile attributes
+        - in: path
+          name: userId
           required: true
           schema:
-            $ref: '#/definitions/UserProfile'
-      produces:
-        - application/json
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
       responses:
         '200':
-          description: User profile retrieved successully
-          schema:
-            $ref: '#/definitions/ApiResponse'
+          description: Profil de l'utilisateur mis à jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
         '400':
-          description: Invalid Fields
-        '500':
-          description: Internal Server Error
-securityDefinitions:
-  Bearer:
-    type: apiKey
-    name: Authorization
-    in: header
-definitions:
-  User:
-    properties:
-      email:
-        type: string
-        description: user email
-      password:
-        type: string
-        description: user password
-      firstName:
-        type: string
-        description: user first name
-      lastName:
-        type: string
-        description: user last name
-  Login:
-    properties:
-      email:
-        type: string
-        description: user email
-      password:
-        type: string
-        description: user password
-  ApiResponse:
-    type: object
-    properties:
-      status:
-        type: integer
-      message:
-        type: string
-      body:
-        type: object
-        properties:
-          id:
+          description: Requête invalide
+          
+          
+# Nouveau: Création d'un compte utilisateur
+  /users:
+    post:
+      summary: Créer un nouveau compte utilisateur
+      tags:
+        - Utilisateurs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewUser'
+      responses:
+        '201':
+          description: Compte utilisateur créé avec succès
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Données invalides fournies
+
+  # Nouveau: Obtenir les comptes bancaires d'un utilisateur
+  /accounts/{userId}:
+    get:
+      summary: Obtenir les comptes bancaires de l'utilisateur
+      tags:
+        - Comptes
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
             type: string
-          email:
+      responses:
+        '200':
+          description: Liste des comptes bancaires récupérée avec succès
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Account'
+
+  # Nouveau: Créer une transaction
+  /transactions:
+    post:
+      summary: Créer une nouvelle transaction
+      tags:
+        - Transactions
+      description: Permet à un utilisateur de créer une transaction financière sur son compte.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewTransaction'
+      responses:
+        '201':
+          description: Transaction créée avec succès, retourne les détails de la transaction.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+        '400':
+          description: Données de transaction invalides, vérifiez les informations soumises.
+        '401':
+          description: Utilisateur non authentifié, un Token valide est nécessaire.
+        '403':
+          description: Utilisateur non autorisé à effectuer cette transaction sur le compte spécifié.
+
+  # Nouveau: Obtenir les transactions d'un compte spécifique
+  /transactions/{accountId}:
+    get:
+      summary: Obtenir les transactions pour un compte spécifique
+      tags:
+        - Transactions
+      parameters:
+        - in: path
+          name: accountId
+          required: true
+          schema:
             type: string
-  LoginResponse:
-    type: object
-    properties:
-      token:
-        type: string
-  UserProfile:
-    type: object
-    properties:
-      firstName:
-        type: string
-      lastName:
-        type: string
+      responses:
+        '200':
+          description: Liste des transactions récupérée avec succès
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Transaction'
+        '404':
+          description: Compte non trouvé
+
+components:
+  schemas:
+    # Schéma existant: User
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+      required:
+        - id
+        - firstName
+        - lastName
+        - email
+
+    # Nouveau schéma: NewUser pour la création de compte
+    NewUser:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+      required:
+        - firstName
+        - lastName
+        - email
+        - password
+
+    # Nouveau schéma: Account pour les comptes bancaires
+    Account:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [checking, savings, credit]
+        balance:
+          type: number
+          format: double
+      required:
+        - id
+        - userId
+        - type
+        - balance
+
+    # Schéma pour une nouvelle transaction
+    NewTransaction:
+      type: object
+      properties:
+        accountId:
+          type: string
+          format: uuid
+          description: L'identifiant unique du compte sur lequel la transaction est effectuée.
+        type:
+          type: string
+          enum: [deposit, Debit, payment, transfer]
+          description: Le type de transaction (dépôt, retrait, paiement, transfert).
+        amount:
+          type: number
+          format: double
+          description: Le montant de la transaction.
+        date:
+          type: string
+          format: date-time
+          description: La date et l'heure auxquelles la transaction a été effectuée.
+      required:
+        - accountId
+        - type
+        - amount
+        - date
+
+    # Schéma pour une transaction
+    Transaction:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: L'identifiant unique de la transaction.
+        accountId:
+          type: string
+          format: uuid
+          description: L'identifiant unique du compte associé à la transaction.
+        type:
+          type: string
+          enum: [deposit, Debit, payment, transfer]
+          description: Le type de transaction effectuée.
+        amount:
+          type: number
+          format: double
+          description: Le montant de la transaction.
+        date:
+          type: string
+          format: date-time
+          description: La date et l'heure de la transaction.
+      required:
+        - id
+        - accountId
+        - type
+        - amount
+        - date

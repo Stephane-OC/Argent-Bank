@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { updateUserProfile } from '../../service/apiService';
 import { setUserProfile } from '../../utils/store';
 
-/* UserEdit component allows for editing  first and last name of user's profile.  *
+/* UserEdit component allows for editing  first and last name of user's profile.  **
 **                                                                                **
 ** It utilizes Redux state for accessing and dispatching user's profile data.     **
 ** Component contains input fields for first and last name, which are pre-filled  **
