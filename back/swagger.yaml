@@ -1,325 +1,444 @@
-openapi: 3.0.0
+swagger: '2.0'
 info:
-  title: Argent Bank API
-  description: >
-    API pour la gestion des utilisateurs de la banque Argent. Vous pouvez trouver plus d'informations sur [ArgentBank](https://www.argentbank.com).
-    
-    Pour contribuer au projet ou consulter le code source, visitez le [répertoire GitHub](https://github.com/Stephane-OC/Argent-Bank/tree/main).
-    
-    La documentation détaillée de l'API est disponible [ici](https://github.com/Stephane-OC/Argent-Bank/blob/main/back/swagger.yaml).
-  version: "1.0"
-  termsOfService: "URL vers vos conditions d''utilisation"
-  contact:
-    name: Service Clients ArgentBank
-    url: https://www.argentbank.com/contact
-    email: support@argentbank.com
-  license:
-    name: 'Apache 2.0'
-    url: 'https://www.apache.org/licenses/LICENSE-2.0.html'
-externalDocs:
-  description: Lien vers la documentation externe
-  url: URL vers la documentation externe
-servers:
-  - url: 'https://api.argentbank.com'
-    description: Serveur principal de production
-
+  title: Bank Argent API documentation
+  description: Contains all available API endpoints in this codebase
+  version: '1.0.0'
+  termsOfService: 'http://swagger.io/terms/'
+host: localhost:3001
+basePath: /api/v1
+schemes:
+  - http
+  
 paths:
-  /users/signin:
+  /user/login:
     post:
-      summary: Authentification d'un utilisateur
       tags:
-        - Utilisateurs
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                  format: email
-                password:
-                  type: string
-                  format: password
-              required:
-                - email
-                - password
-      responses:
-        '200':
-          description: Connexion réussie, retourne le Token d'authentification et les informations de l'utilisateur.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  token:
-                    type: string
-                  user:
-                    $ref: '#/components/schemas/User'
-        '401':
-          description: Authentification échouée, les identifiants sont incorrects.
-
-  /users/{userId}:
-    get:
-      summary: Obtenir le profil de l'utilisateur
-      tags:
-        - Utilisateurs
+        - User Module
+      summary: Login
+      description: API for Login
       parameters:
-        - in: path
-          name: userId
+        - in: body
+          name: body
+          description: Login Payload
           required: true
           schema:
-            type: string
+            $ref: '#/definitions/Login'
+      produces:
+        - application/json
       responses:
         '200':
-          description: Profil de l'utilisateur récupéré avec succès
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-        '404':
-          description: Utilisateur non trouvé
-
-    put:
-      summary: Mettre à jour le profil de l'utilisateur
-      tags:
-        - Utilisateurs
-      parameters:
-        - in: path
-          name: userId
-          required: true
+          description: Login Successfully
           schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/User'
-      responses:
-        '200':
-          description: Profil de l'utilisateur mis à jour
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
+            $ref: '#/definitions/LoginResponse'
         '400':
-          description: Requête invalide
-          
-          
-# Nouveau: Création d'un compte utilisateur
+          description: Invalid Fields
+        '500':
+          description: Internal Server Error
+
+  /user/signup:
+    post:
+      tags:
+        - User Module
+      summary: Signup
+      description: API for Signup
+      parameters:
+        - in: body
+          name: body
+          description: Signup Payload
+          required: true
+          schema:
+            $ref: '#/definitions/User'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Signup Successfully
+          schema:
+            $ref: '#/definitions/ApiResponse'
+        '400':
+          description: Invalid Fields
+        '500':
+          description: Internal Server Error
+
+  /user/profile:
+    post:
+      security:
+        - Bearer: []
+      tags:
+        - User Module
+      summary: User Profile API
+      description: API for fetching a user profile
+      parameters:
+        - in: header
+          name: Authorization
+          type: string
+          description: Attach Bearer JWT token
+          required: true
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: User profile retrieved successully
+          schema:
+            $ref: '#/definitions/ApiResponse'
+        '400':
+          description: Invalid Fields
+        '500':
+          description: Internal Server Error
+    put:
+      security:
+        - Bearer: []
+      tags:
+        - User Module
+      summary: User Profile API
+      description: API for updating a user profile
+      parameters:
+        - in: header
+          name: Authorization
+          type: string
+          description: Attach Bearer JWT token
+          required: true
+        - in: body
+          name: body
+          description: Update user profile attributes
+          required: true
+          schema:
+            $ref: '#/definitions/UserProfile'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: User profile retrieved successully
+          schema:
+            $ref: '#/definitions/ApiResponse'
+        '400':
+          description: Invalid Fields
+        '500':
+          description: Internal Server Error
+
+  # New: Create a User Account
   /users:
     post:
-      summary: Créer un nouveau compte utilisateur
       tags:
-        - Utilisateurs
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/NewUser'
+        - Users
+      summary: Create a New User Account
+      description: API to create a new user account
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/NewUser'
+      produces:
+        - application/json
       responses:
         '201':
-          description: Compte utilisateur créé avec succès
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
+          description: User account created successfully
+          schema:
+            $ref: '#/definitions/User'
         '400':
-          description: Données invalides fournies
+          description: Invalid data provided
 
-  # Nouveau: Obtenir les comptes bancaires d'un utilisateur
+  # New: Get a User's Bank Accounts
   /accounts/{userId}:
     get:
-      summary: Obtenir les comptes bancaires de l'utilisateur
       tags:
-        - Comptes
+        - Accounts
+      summary: Get a User's Bank Accounts
+      description: API to obtain a user's bank accounts
       parameters:
         - in: path
           name: userId
           required: true
-          schema:
-            type: string
+          type: string
+          description: Unique ID of the user
+      produces:
+        - application/json
       responses:
         '200':
-          description: Liste des comptes bancaires récupérée avec succès
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Account'
+          description: List of bank accounts retrieved successfully
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Account'
+        '404':
+          description: User not found
+   
+    # New: Account Update
+    put:
+      security:
+        - Bearer: []
+      tags:
+        - Accounts
+      summary: Update User Account
+      description: API for updating a user's account
+      parameters:
+        - in: path
+          name: userId
+          type: string
+          required: true
+          description: Unique ID of the user
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/UserUpdate'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: User account updated successfully
+          schema:
+            $ref: '#/definitions/User'
+        '400':
+          description: Invalid input
+        '401':
+          description: Unauthorized
+        '404':
+          description: User not found
 
-  # Nouveau: Créer une transaction
+  # New: Delete Account
+  /user/{userId}:
+    delete:
+      security:
+        - Bearer: []
+      tags:
+        - Accounts
+      summary: Delete User Account
+      description: API for deleting a user's account
+      parameters:
+        - in: path
+          name: userId
+          type: string
+          required: true
+          description: Unique ID of the user
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: User account deleted successfully
+        '401':
+          description: Unauthorized
+        '404':
+          description: User not found
+
+ # New: Create a Transaction
   /transactions:
     post:
-      summary: Créer une nouvelle transaction
       tags:
         - Transactions
-      description: Permet à un utilisateur de créer une transaction financière sur son compte.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/NewTransaction'
+      summary: Create a New Transaction
+      description: Allows a user to create a financial transaction on their account.
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/NewTransaction'
+      produces:
+        - application/json
       responses:
         '201':
-          description: Transaction créée avec succès, retourne les détails de la transaction.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Transaction'
+          description: Transaction created successfully
+          schema:
+            $ref: '#/definitions/Transaction'
         '400':
-          description: Données de transaction invalides, vérifiez les informations soumises.
-        '401':
-          description: Utilisateur non authentifié, un Token valide est nécessaire.
-        '403':
-          description: Utilisateur non autorisé à effectuer cette transaction sur le compte spécifié.
+          description: Invalid transaction data
 
-  # Nouveau: Obtenir les transactions d'un compte spécifique
+  # New: Get Transactions for a Specific Account
   /transactions/{accountId}:
     get:
-      summary: Obtenir les transactions pour un compte spécifique
       tags:
         - Transactions
+      summary: Get Transactions for a Specific Account
+      description: Retrieves a list of transactions for a specific account
       parameters:
         - in: path
           name: accountId
           required: true
-          schema:
-            type: string
+          type: string
+      produces:
+        - application/json
       responses:
         '200':
-          description: Liste des transactions récupérée avec succès
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Transaction'
+          description: List of transactions retrieved successfully
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Transaction'
         '404':
-          description: Compte non trouvé
+          description: Account not found
 
-components:
-  schemas:
-    # Schéma existant: User
-    User:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        firstName:
-          type: string
-        lastName:
-          type: string
-        email:
-          type: string
-          format: email
-      required:
-        - id
-        - firstName
-        - lastName
-        - email
 
-    # Nouveau schéma: NewUser pour la création de compte
-    NewUser:
-      type: object
-      properties:
-        firstName:
-          type: string
-        lastName:
-          type: string
-        email:
-          type: string
-          format: email
-        password:
-          type: string
-          format: password
-      required:
-        - firstName
-        - lastName
-        - email
-        - password
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
 
-    # Nouveau schéma: Account pour les comptes bancaires
-    Account:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        userId:
-          type: string
-          format: uuid
-        type:
-          type: string
-          enum: [checking, savings, credit]
-        balance:
-          type: number
-          format: double
-      required:
-        - id
-        - userId
-        - type
-        - balance
+definitions:
+  User:
+    properties:
+      email:
+        type: string
+        description: user email
+      password:
+        type: string
+        description: user password
+      firstName:
+        type: string
+        description: user first name
+      lastName:
+        type: string
+        description: user last name
+        
+  Login:
+    properties:
+      email:
+        type: string
+        description: user email
+      password:
+        type: string
+        description: user password
+  ApiResponse:
+    type: object
+    properties:
+      status:
+        type: integer
+      message:
+        type: string
+      body:
+        type: object
+        properties:
+          id:
+            type: string
+          email:
+            type: string
+            
+  LoginResponse:
+    type: object
+    properties:
+      token:
+        type: string
+  UserProfile:
+    type: object
+    properties:
+      firstName:
+        type: string
+      lastName:
+        type: string
 
-    # Schéma pour une nouvelle transaction
-    NewTransaction:
-      type: object
-      properties:
-        accountId:
-          type: string
-          format: uuid
-          description: L'identifiant unique du compte sur lequel la transaction est effectuée.
-        type:
-          type: string
-          enum: [deposit, Debit, payment, transfer]
-          description: Le type de transaction (dépôt, retrait, paiement, transfert).
-        amount:
-          type: number
-          format: double
-          description: Le montant de la transaction.
-        date:
-          type: string
-          format: date-time
-          description: La date et l'heure auxquelles la transaction a été effectuée.
-      required:
-        - accountId
-        - type
-        - amount
-        - date
+  NewUser:
+    type: object
+    properties:
+      firstName:
+        type: string
+      lastName:
+        type: string
+      email:
+        type: string
+      password:
+        type: string
+    required:
+      - firstName
+      - lastName
+      - email
+      - password
 
-    # Schéma pour une transaction
-    Transaction:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: L'identifiant unique de la transaction.
-        accountId:
-          type: string
-          format: uuid
-          description: L'identifiant unique du compte associé à la transaction.
-        type:
-          type: string
-          enum: [deposit, Debit, payment, transfer]
-          description: Le type de transaction effectuée.
-        amount:
-          type: number
-          format: double
-          description: Le montant de la transaction.
-        date:
-          type: string
-          format: date-time
-          description: La date et l'heure de la transaction.
-      required:
-        - id
-        - accountId
-        - type
-        - amount
-        - date
+  Account:
+    type: object
+    properties:
+      id:
+        type: string
+      userId:
+        type: string
+      type:
+        type: string
+        enum: [checking, savings, credit]
+      balance:
+        type: number
+    required:
+      - id
+      - userId
+      - type
+      - balance
+  
+  UserUpdate:
+    type: object
+    properties:
+      email:
+        type: string
+        description: Updated email of the user
+      password:
+        type: string
+        description: Updated password of the user
+      firstName:
+        type: string
+        description: Updated first name of the user
+      lastName:
+        type: string
+        description: Updated last name of the user
+    required:
+      - email
+      - firstName
+      - lastName
+
+  UserOperationResponse:
+    type: object
+    properties:
+      status:
+        type: integer
+        description: Status code of the operation
+      message:
+        type: string
+        description: Message describing the result of the operation
+      data:
+        type: object
+        properties:
+          userId:
+            type: string
+            description: ID of the user who was updated or deleted
+
+  NewTransaction:
+    type: object
+    properties:
+      accountId:
+        type: string
+        description: The unique identifier of the account on which the transaction is performed.
+      type:
+        type: string
+        enum: [deposit, debit, payment, transfer]
+        description: Type of transaction (deposit, withdrawal, payment, transfer).
+      amount:
+        type: number
+        description: Amount of the transaction.
+      date:
+        type: string
+        format: date-time
+        description: Date and time when the transaction was performed.
+    required:
+      - accountId
+      - type
+      - amount
+      - date
+
+  Transaction:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier of the transaction.
+      accountId:
+        type: string
+        description: Unique identifier of the account associated with the transaction.
+      type:
+        type: string
+        enum: [deposit, debit, payment, transfer]
+        description: Type of transaction performed.
+      amount:
+        type: number
+        description: Amount of the transaction.
+      date:
+        type: string
+        format: date-time
+        description: Date and time of the transaction.
