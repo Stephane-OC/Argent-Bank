@@ -116,29 +116,6 @@ paths:
         '500':
           description: Internal Server Error
 
-  # New: Create a User Account
-  /users:
-    post:
-      tags:
-        - Users
-      summary: Create a New User Account
-      description: API to create a new user account
-      parameters:
-        - in: body
-          name: body
-          required: true
-          schema:
-            $ref: '#/definitions/NewUser'
-      produces:
-        - application/json
-      responses:
-        '201':
-          description: User account created successfully
-          schema:
-            $ref: '#/definitions/User'
-        '400':
-          description: Invalid data provided
-
   # New: Get a User's Bank Accounts
   /accounts/{userId}:
     get:
@@ -269,6 +246,54 @@ paths:
         '404':
           description: Account not found
 
+    put:
+      security:
+        - Bearer: []
+      tags:
+        - Transactions
+      summary: Update a Transaction
+      description: API to update a financial transaction.
+      parameters:
+        - in: path
+          name: transactionId
+          type: string
+          required: true
+          description: Unique identifier of the transaction to update.
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/UpdateTransaction'
+      responses:
+        '200':
+          description: Transaction updated successfully.
+        '400':
+          description: Invalid transaction data.
+        '401':
+          description: Unauthorized.
+        '404':
+          description: Transaction not found.
+
+    delete:
+      security:
+        - Bearer: []
+      tags:
+        - Transactions
+      summary: Delete a Transaction
+      description: API to delete a financial transaction.
+      parameters:
+        - in: path
+          name: transactionId
+          type: string
+          required: true
+          description: Unique identifier of the transaction to delete.
+      responses:
+        '200':
+          description: Transaction deleted successfully.
+        '401':
+          description: Unauthorized.
+        '404':
+          description: Transaction not found.
 
 securityDefinitions:
   Bearer:
@@ -314,7 +339,7 @@ definitions:
             type: string
           email:
             type: string
-            
+
   LoginResponse:
     type: object
     properties:
@@ -404,7 +429,7 @@ definitions:
     properties:
       accountId:
         type: string
-        description: The unique identifier of the account on which the transaction is performed.
+        description: Unique identifier of the account on which the transaction is performed.
       type:
         type: string
         enum: [deposit, debit, payment, transfer]
@@ -442,3 +467,39 @@ definitions:
         type: string
         format: date-time
         description: Date and time of the transaction.
+
+  UpdateTransaction:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier of the transaction to be updated.
+      accountId:
+        type: string
+        description: Unique identifier of the account associated with the transaction.
+      type:
+        type: string
+        enum: [deposit, debit, payment, transfer]
+        description: Updated type of the transaction.
+      amount:
+        type: number
+        description: Updated amount of the transaction.
+      date:
+        type: string
+        format: date-time
+        description: Updated date and time of the transaction.
+    required:
+      - id
+      - accountId
+      - type
+      - amount
+      - date
+
+  DeleteTransaction:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier of the transaction to be deleted.
+    required:
+      - id      
